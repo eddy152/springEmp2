@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yedam.emp.service.impl.EmpMapper">
+	<!-- Record of Case -->
+	<select id="getCount" resultType="int"> 
+		SELECT COUNT(*) 
+			FROM EMPLOYEES E , DEPARTMENT D
+		WHERE E.DEPARTMENT_ID = D.DEPARTMENT_ID	
+			<if test="department_id != null and department_id != '' ">
+     			AND	E.DEPARTMENT_ID = #{department_id}
+			</if>
+			<if test="job_id != null and job_id != '' ">
+				AND E.JOB_ID = #{job_id}
+			</if>
+			<if test="first_name != null and first_name != '' ">
+				AND upper (FIRST_NAME) LIKE '%' || upper(#{first_name}) || '%'
+			</if>
+	</select>
+	
+	<select id="getSearchEmp" parameterType="empSearchVO" resultType="emp">
+		  select b.*   from     ( select rownum rn, a.* from ( 
+		  
+		  	SELECT E.*, D.DEPARTMENT_NAME
+		  		FROM EMPLOYEES E, DEPARTMENTS D
+		  		WHERE E.DEPARTMENT_ID = D.DEPARTMENT_ID
+		
+	<!-- 	SELECT e.employee_id, e.first_name,  d.department_name, j.Job_Title 
+		FROM employees e left join departments d 
+							on e.department_id = d.department_id
+						 left join 	Jobs j
+						 	on  e.job_id = j.job_id -->
+		 		<!-- Null and null string are not the same -->
+			<if test="department_id != null and department_id != '' ">
+				AND E.DEPARTMENT_ID = #{department_id}
+			</if>
+			<if test="job_id != null and job_id != '' ">
+				AND E.JOB_ID = #{job_id}
+			</if>
+			<if test="first_name != null and first_name != '' ">
+				AND upper (FIRST_NAME) LIKE '%' || upper(#{first_name}) || '%'
+			</if>
+		
+		ORDER BY EMPLOYEE_ID
+	    ) a ) b  where rn between #{start} and #{end}   
+	</select>
+
+	<insert id="insertEmp" parameterType="emp">
+		INSERT INTO EMPLOYEES
+		( EMPLOYEE_ID,
+		FIRST_NAME,
+		LAST_NAME,
+		EMAIL,
+		HIRE_DATE,
+		JOB_ID,
+		<if test="manager_id !=null"> MANAGER_ID, </if>
+		DEPARTMENT_ID)
+		VALUES(
+		#{employee_id},
+		#{first_name},
+		#{last_name},
+		#{email},
+		#{hire_date},
+		#{job_id},
+		<if test="manager_id !=null"> #{manager_id}, </if>
+		#{department_id} )
+	</insert>
+
+	<update id="updateEmp">
+		UPDATE EMPLOYEES
+		<set>
+			<if test="employee_id != null"> EMPLOYEE_ID=#{employee_id}, </if>
+			<if test="first_name != null"> FIRST_NAME=#{first_name}, </if>
+			<if test="last_name != null"> LAST_NAME=#{last_name},</if>
+			<if test="email != null"> EMAIL=#{email},</if>
+			<if test="hire_date != null"> HIRE_DATE=#{hire_date},</if>
+			<if test="job_id != null"> JOB_ID=#{job_id},</if>
+			<if test="department_id != null"> DEPARTMENT_ID=#{department_id}</if>
+		</set>
+		WHERE EMPLOYEE_ID=#{employee_id}
+	</update>
+
+	<delete id="deleteEmp">
+		DELETE FROM EMPLOYEES
+		WHERE EMPLOYEE_ID = #{employee_id}
+	</delete>
+
+	<select id="getEmp" resultType="emp">
+		SELECT *
+		FROM EMPLOYEES
+		WHERE
+		EMPLOYEE_ID = #{employee_id}
+	</select>
+
+</mapper>
